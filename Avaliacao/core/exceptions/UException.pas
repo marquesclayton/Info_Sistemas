@@ -1,0 +1,50 @@
+unit UException;
+
+interface
+
+  uses SysUtils, UMessage;
+
+  type
+    ExceptionCMP = class(Exception)
+
+      private
+        FMessage: TMessage;
+      public
+        property msg: TMessage read FMessage;
+
+        constructor Create(const lMessage: String; const lTitle: String; const lMotive: String; const lIcon: String; const lSeverity: String; const lStatusCode: Int8); overload;
+        constructor Create(const lMsg: TMessage); overload;
+        constructor Create(const JsonString: String; const lStatusCode: Int8); overload;
+
+        destructor Destroy;override;
+    end;
+
+implementation
+
+{ THttpException }
+
+constructor ExceptionCMP.Create(const lMessage, lTitle, lMotive, lIcon,
+  lSeverity: String; const lStatusCode: Int8);
+begin
+  FMessage := TMessage.Create(lMessage, lTitle, lIcon, lMotive, lSeverity,lStatusCode);
+end;
+
+constructor ExceptionCMP.Create(const JsonString: String; const lStatusCode: Int8);
+begin
+    Self.FMessage := TMessage.Create(JsonString, lStatusCode);
+end;
+
+constructor ExceptionCMP.Create(const lMsg: TMessage);
+begin
+  FMessage := lMsg;
+end;
+
+destructor ExceptionCMP.Destroy;
+begin
+  if(Assigned(FMessage)) then begin
+    FreeAndNil(FMessage);
+  end;
+
+end;
+
+end.
