@@ -1,0 +1,170 @@
+unit UTheme;
+
+interface
+
+uses Controls, Windows, Messages, Graphics;
+
+type
+    TThemeData = class(TObject)
+
+        private
+            _primaryColor: Tcolor;
+            _menuColor: TColor;
+            _menuButtonColor: TColor;
+            _primaryButtonColor: TColor;
+            _messageErrorColor: TColor; //$001B16BE
+            _messageInfoColor: TColor; //$00BE9516
+            _messageWarningColor:TColor ; //$0016BEBE
+            _messageOkColor: TColor; //$0041BE16
+            _panelColorField:TColor;
+
+            _colorFormInList: TColor;
+            _colorFormInNew: TColor;
+            _colorFormInEdit: Tcolor;
+            _colorFormInView: Tcolor;
+
+
+
+
+            function getMenuButtonColor: TColor;
+            function getMenuColor: Tcolor;
+            function getPrimaryColor: Tcolor;
+            function getMessageErrorColor: TColor;
+            function getMessageInfoColor: TColor;
+            function getMessageOkColor: TColor;
+            function getMessageWarningColor: TColor;
+            function getPrimaryButtonColor: TColor;
+            function getPanelColorField: TColor;
+            function getColorFormInEdit: TColor;
+            function getColorFormInList: TColor;
+            function getColorFormInNew: TColor;
+            function getColorFormInView: TColor;
+        public
+            procedure makeRounded(Control: TWinControl; radius: Integer = 5);
+
+            property primaryColor: Tcolor read getPrimaryColor;
+            property menuColor: Tcolor read getMenuColor;
+            property menuButtonColor: TColor read getMenuButtonColor;
+            property messageErrorColor: TColor read getMessageErrorColor; //$001B16BE
+            property messageInfoColor: TColor read getMessageInfoColor; //$00BE9516
+            property messageWarningColor: TColor read getMessageWarningColor; //$0016BEBE
+            property messageOkColor: TColor read getMessageOkColor; //$0041BE16
+            property primaryButtonColor: TColor read getPrimaryButtonColor;
+            property panelColorField: TColor read getPanelColorField;
+
+            property colorFormInList: TColor read getColorFormInList;
+            property colorFormInNew: TColor read  getColorFormInNew;
+            property colorFormInEdit: TColor read getColorFormInEdit;
+            property colorFormInView: TColor read getColorFormInView;
+
+            constructor Create;
+
+    end;
+
+implementation
+
+{ TThemeData }
+
+constructor TThemeData.Create;
+begin
+    inherited Create;
+    _primaryColor:= $00FFFFFF;
+    _menuColor:= $00BFBDB7;
+    _menuButtonColor:= _menuColor + $00070E17;
+    _primaryButtonColor:= $00FF8D48;
+    _messageErrorColor:= $001B16BE;
+    _messageInfoColor:= $00BE9516;
+    _messageWarningColor:= $0016BEBE;
+    _messageOkColor:= $0041BE16;
+    _panelColorField:= $00E2E2E2;
+
+    _colorFormInNew := $00F7F7DF;
+    _colorFormInList:= $00DFDFDF;
+    _colorFormInEdit := $00D6E2CF;
+    _colorFormInView := $00C0F7F8;
+
+end;
+
+function TThemeData.getColorFormInEdit: TColor;
+begin
+    result := Self._colorFormInEdit;
+end;
+
+function TThemeData.getColorFormInList: TColor;
+begin
+  result := Self._colorFormInList;
+end;
+
+function TThemeData.getColorFormInNew: TColor;
+begin
+  result := Self._colorFormInNew;
+end;
+
+function TThemeData.getColorFormInView: TColor;
+begin
+  result := Self._colorFormInView;
+end;
+
+function TThemeData.getMenuButtonColor: TColor;
+begin
+    result := getMenuColor + $00070E17;
+end;
+
+function TThemeData.getMenuColor: Tcolor;
+begin
+    result := $00BFBDB7;
+end;
+
+function TThemeData.getMessageErrorColor: TColor;
+begin
+    result := $001B16BE;
+end;
+
+function TThemeData.getMessageInfoColor: TColor;
+begin
+    result := $00BE9516;
+end;
+
+function TThemeData.getMessageOkColor: TColor;
+begin
+    result := $0041BE16;
+end;
+
+function TThemeData.getMessageWarningColor: TColor;
+begin
+    result := $0016BEBE;
+end;
+
+function TThemeData.getPanelColorField: TColor;
+begin
+    result := $00E2E2E2;
+end;
+
+function TThemeData.getPrimaryButtonColor: TColor;
+begin
+    result:= $00FF8D48;
+end;
+
+function TThemeData.getPrimaryColor: Tcolor;
+begin
+    result := $00FFFFFF;
+end;
+
+procedure TThemeData.makeRounded(Control: TWinControl; radius: Integer = 5);
+var
+    R: TRect;
+    Rgn: HRGN;
+begin
+    with Control do begin
+        R := ClientRect;
+        rgn := CreateRoundRectRgn(R.Left, R.Top, R.Right, R.Bottom, radius, radius);
+        //rgn := CreateRoundRectRgn(Left, Top, Width, Height, radius, radius);
+        Perform(EM_GETRECT, 0, lParam(@r));
+        InflateRect(r, - 5, - 5);
+        Perform(EM_SETRECTNP, 0, lParam(@r));
+        SetWindowRgn(Handle, rgn, True);
+        Invalidate;
+    end;
+end;
+
+end.

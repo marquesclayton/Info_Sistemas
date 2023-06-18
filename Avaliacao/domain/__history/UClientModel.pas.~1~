@@ -1,0 +1,40 @@
+unit UClientModel;
+
+interface
+
+    uses UBaseModelName, UAddressModel;
+
+type
+    TClientModel = class(TBaseModelName)
+
+        private
+            FName: String;
+            FIdCard: String;
+            FSocialSecurity: String;
+            FTelephone: String;
+            FEmail: String;
+            FAddress: TAddressModel;
+            FPostalCode: String;
+            FStreet: String;
+            FNumber: STring;
+            FComplement: String;
+            FDistrict: String;
+            FState: String;
+            FCity: String;
+            FCountry: String;
+
+        public
+            property name: String read FName write FName;
+            property idCard: String read FIdCard write FIdCard;
+            property socialSecurity: String read FSocialSecurity write FSocialSecurity;
+            property telephone: String read FTelephone write FTelephone;
+            property email: String read FEmail write FEmail;
+            property address: TAddressModel read FAddress write FAddress;
+
+    end;
+
+    TListClient = array of TClientModel;
+
+implementation
+
+end.

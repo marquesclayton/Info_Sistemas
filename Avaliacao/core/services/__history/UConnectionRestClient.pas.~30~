@@ -1,0 +1,160 @@
+unit UConnectionRestClient;
+
+interface
+
+  uses IdHTTP, IdIntercept, Classes, IdException, Dialogs, IdZLibCompressorBase, IdCompressorZLib, SysUtils, UUtilString;
+
+  type
+
+    THeader = record
+        key: String;
+        value: String;
+    end;
+
+    VHeaders = array of THeader;
+    TTypeRequest = (SEND_POST, SEND_GET);
+    TConRestClient = class(TIdHTTP)
+      private
+        FHeader: VHeaders;
+        FBaseUrl: String;
+        FIdCompressorZLib1: TIdCompressorZLib;
+
+        strngUtil: TUtilString;
+
+        function adjustStringResponse(const value: String) : String;
+        function send(const service: String; const data: String; const typeRequest: TTypeRequest ): String;
+      public
+        property baseUrl: String read FBaseUrl ;
+        property header: VHeaders read FHeader write FHeader;
+
+        constructor Create(Aowner: TComponent; const lBaseUrl: String; lVHeader:VHeaders);
+        destructor Destroy(); override;
+
+        procedure addHeader(const lHeader: THeader);
+
+        function sendPost(const service: String; const data: String): String;
+        function sendGet(const service: String; const data: String): String;
+
+      end;
+implementation
+
+uses UException, IdSSLOpenSSL;
+
+{ TConRestClient }
+
+procedure TConRestClient.addHeader(const lHeader: THeader);
+var index: Integer;
+begin
+    index := 0;
+    if(Assigned(FHeader)) then begin
+        index := Length(FHeader);
+    end;
+
+    SetLength(FHeader, index + 1);
+    FHeader[index] := lHeader;
+end;
+
+function TConRestClient.adjustStringResponse(const value: String): String;
+begin
+  result := StringReplace(Self.strngUtil.converter_utf8_ansi(value), #$D#$A, '', [rfReplaceAll]);
+end;
+
+constructor TConRestClient.Create(Aowner: TComponent; const lBaseUrl: String; lVHeader: VHeaders);
+var
+    LHandler: TIdSSLIOHandlerSocketOpenSSL;
+begin
+  inherited Create(AOwner);
+  LHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+
+//  LHandler.SSLOptions.Method := sslvSSLv2;
+//  LHandler.SSLOptions.Mode := sslmClient;
+//  LHandler.SSLOptions.VerifyMode := [];
+//  LHandler.SSLOptions.VerifyDepth := 0;
+//  LHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+//  LHandler.SSLContext.Method := sslvTLSv1;
+//  LHandler.SSLContext.Mode := sslmClient;
+//  LHandler.SSLContext.VerifyMode := [];
+//  LHandler.SSLContext.VerifyDepth := 0;
+  self.strngUtil := TUtilString.getInstance;
+  Self.FBaseUrl := lBaseUrl;
+  Self.FHeader := lVHeader;
+  //Self.IOHandler := LHandler;
+  Self.ProtocolVersion := pv1_1;
+  Self.FIdCompressorZLib1 := TIdCompressorZLib.Create(Self);
+  self.Compressor := Self.FIdCompressorZLib1;
+end;
+
+destructor TConRestClient.Destroy;
+begin
+  if(Assigned(FIdCompressorZLib1)) then begin
+    FreeAndNil(FIdCompressorZLib1);
+  end;
+  inherited;
+end;
+
+function TConRestClient.sendGet(const service: String; const data: String): String;
+begin
+    result := send(service, data, SEND_GET);
+end;
+
+function TConRestClient.send(const service, data: String;
+  const typeRequest: TTypeRequest): String;
+var response: TStringstream;
+url: String;
+Asource: TStringList;
+  i: Integer;
+begin
+
+    try
+      try
+        response := TStringstream.Create('');
+        Asource := TStringList.Create;
+        Asource.Append(data);
+
+        url := baseUrl+'/'+service;
+        Self.Request.CustomHeaders.Clear;
+        Self.Request.Clear;
+        if(Assigned(FHeader)) then begin
+            if(Length(FHeader) > 0) then begin
+                for i := 0 to High(FHeader) do begin
+                    with Self.Request.CustomHeaders do begin
+                        AddValue(FHeader[i].key, FHeader[i].value);
+                    end;
+                end;
+            end;
+        end;
+
+        Self.Request.ContentType := 'application/json;charset=utf-8';
+        Self.Request.ContentEncoding := 'multipart/form-data';
+        Self.Request.Accept := 'application/json, text/plain, */*';
+        Self.Request.Referer := url;
+        if(typeRequest = SEND_POST) then begin
+            Self.Post(url, ASource, Response);
+        end else begin
+            Self.Get(url, Response);
+        end;
+        if(Self.ResponseCode > 299) then begin
+            raise ExceptionCMP.Create(adjustStringResponse(Self.ResponseText), Self.ResponseCode);
+        end else begin
+            Result := adjustStringResponse(Response.DataString);
+        end;
+
+    except
+      on error: EIdHTTPProtocolException do begin
+        if(error.ErrorCode > 299)then begin
+          raise ExceptionCMP.Create(adjustStringResponse(error.ErrorMessage), error.ErrorCode);
+        end;
+      end;
+    end;
+  finally
+      Response.Free;
+      Asource.Free;
+  end;
+end;
+
+function TConRestClient.sendPost(const service: String; const data: String): String;
+begin
+    result := send(service, data, SEND_POST);
+end;
+
+end.

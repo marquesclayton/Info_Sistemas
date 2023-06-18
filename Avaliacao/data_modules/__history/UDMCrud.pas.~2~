@@ -1,0 +1,37 @@
+unit UDMCrud;
+
+interface
+
+uses
+  SysUtils, DBClient, DB, Classes;
+
+type
+  TdmCrud = class(TDataModule)
+    cdClient: TClientDataSet;
+    cdClientName: TStringField;
+    cdClientemail: TStringField;
+    cdClienttelephone: TStringField;
+    cdClientid: TLargeintField;
+    cdClientidCArd: TStringField;
+    cdClientsocialSecurity: TStringField;
+    cdClientstreet: TStringField;
+    cdClientnumber: TStringField;
+    cdClientcomplement: TStringField;
+    cdClientdistrict: TStringField;
+    cdClientcity: TStringField;
+    cdClientstate: TStringField;
+    cdClientcountry: TStringField;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dmCrud: TdmCrud;
+
+implementation
+
+{$R *.dfm}
+
+end.

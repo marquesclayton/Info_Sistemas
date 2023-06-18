@@ -1,0 +1,698 @@
+﻿unit Util;
+
+interface
+
+uses SysUtils, StrUtils, Classes, Forms, Windows, Graphics, Dialogs, ShellAPI;
+
+type
+
+    chave = '‗¾¶§÷¸°¨·¹°²■';
+
+  TAlertaThred = class(TThread)
+   private
+    FTempo : integer;
+    procedure executaBeep;
+    function getTempoToTime: TTime;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create (const CreateSuspended : boolean; const tempo: integer);
+  end;
+
+    vString = array of String;
+
+    function iif(conditional: boolean; valueT: Variant; valueF: Variant) : Variant;
+    function Split(text: String; Delimiter: Char): vString;
+    function getPath():String;
+    function completeZero(const value: String; size: Integer; esquerda: boolean = true): String;
+    function to_upper(const value: String):String;
+    function to_lower(const value: String):String;
+    function validaCPF(const value: String):boolean;
+    function validaCNPJ(const value: String):boolean;
+    function validaEmail(const value: String):boolean;
+    function validaCEP(const value: String):boolean;
+    function removeMascaraTelefone(const value: String):String;
+    function removeMascaraCPF(const value: String):String;
+    function removeMascaraCEP(const value: String):String;
+
+    function DvCNPJ ( str: String ): String;
+    function DvModulo11 ( str: String ): Char;
+    function chInt ( ch: Char ): ShortInt;
+    function intCh ( int: ShortInt ): Char;
+    function DvCPF ( str: String ): String;
+    function dvModulo11ParaCPF ( str: String ): Char;
+
+    function testaCampoEmail(const value: String; const msg: String; var state : Integer): TColor;
+    function testaCampoCPF(const value: String; const msg: String; var state : Integer): TColor;
+    function testaCampoCNPJ(const value: String; const msg: String; var state : Integer): TColor;
+    function testaCampoCEP(const value: String; const msg: String; var state : Integer): TColor;
+    function testaCampoPorDataMaior(const value: TDate; const maximo: TDate; const msg: String; var state : Integer): TColor;
+    function testaCampoHoraPreenchido(const value: TTime; const msg: String; var state : Integer): TColor;
+    function testaCampoPorTamanho(const value: String; const minimo, maximo: Integer; const msg: String; var state : Integer): TColor;
+    function testaCampoPorTamanhoSeInformado(const value: String; const minimo, maximo: Integer; const msg: String; var state : Integer): TColor;
+    function testaCampoEmailSeInformado(const value: String; const msg: String; var state : Integer): TColor;
+    function emiteErro(const msg: String; var state : Integer): TColor;
+
+    function comparaHora(const value1:TDateTime; const value2:TDateTime):SmallInt;
+    function comparaDiaHora(const value1:TDateTime; const value2:TDateTime):SmallInt;
+    function comparaDia(const value1:TDateTime; const value2:TDateTime):SmallInt;
+
+    function EnDEcriptar(Texto : String) : String;
+    function MontaChave(Texto : String) : String;
+    procedure addLineInVString(var vtString: vString; const line: String);
+    procedure lerArquivo(var vtString:vString; arq : string; cript:Boolean = False);
+    function gravaArquivo(var vtString:vString; arq : string; cript:Boolean = False):boolean;
+    function ProcessArquivo(const Origem, Destino : string; Operacao:Integer = 1; Modo:Integer = 1) : Boolean;
+
+implementation
+
+function iif(conditional: boolean; valueT: Variant; valueF: Variant) : Variant;
+begin
+    if (conditional) then begin
+        result := valueT;
+    end else begin
+        result := valueF;
+    end;
+end;
+
+function getPath():String;
+begin
+     result := ExtractFilePath(Application.ExeName);
+end;
+
+procedure alerta(q, t:integer);
+begin
+
+end;
+
+function completeZero(const value: String; size: Integer; esquerda: boolean = true): String;
+var
+   tam: integer;
+  I: Integer;
+begin
+     tam := size - Length(value);
+
+     result := EmptyStr;
+
+     if(tam > 0) then begin
+        for I := 1 to tam do begin
+            result := '0' + result;
+        end;
+        if(esquerda) then  begin
+            result := result + value;
+        end else begin
+            result := value + result;
+        end;
+
+     end else begin
+         result := value;
+     end;
+end;
+
+function to_upper(const value: String):String;
+var
+  i :  Integer;
+
+  function to_char_upper(const ch: char): char;
+  begin
+  to_char_upper := ch;
+    case ch of
+      'â': to_char_upper := 'Â';
+      'á': to_char_upper := 'Á';
+      'ã': to_char_upper := 'Ã';
+      'à': to_char_upper := 'À';
+      'é': to_char_upper := 'É';
+      'ê': to_char_upper := 'Ê';
+      'è': to_char_upper := 'È';
+      'í': to_char_upper := 'Ì';
+      'î': to_char_upper := 'Î';
+      'ô': to_char_upper := 'Ô';
+      'ó': to_char_upper := 'Ò';
+      'õ': to_char_upper := 'Õ';
+      'ò': to_char_upper := 'Ò';
+      'ü': to_char_upper := 'Ü';
+      'ú': to_char_upper := 'Ú';
+      'ç': to_char_upper := 'Ç';
+    end;
+  end;
+begin
+  result := UpperCase(value);
+  if(length(trim(value)) > 0) then begin
+    for i := 0 to Length(result) do begin
+       result[i] := to_char_upper(result[i]);
+    end;
+  end;
+
+end;
+
+function to_lower(const value: String):String;
+var
+  i :  Integer;
+
+  function to_char_lower(const ch: String): char;
+  begin
+  to_char_lower := ch[1];
+    case ch[1] of
+      'Â': to_char_lower := 'â';
+      'Á': to_char_lower := 'á';
+      'Ã': to_char_lower := 'ã';
+      'À': to_char_lower := 'à';
+      'É': to_char_lower := 'é';
+      'Ê': to_char_lower := 'ê';
+      'È': to_char_lower := 'è';
+      'Ì': to_char_lower := 'í';
+      'Î': to_char_lower := 'î';
+      'Ô': to_char_lower := 'ô';
+      'Ó': to_char_lower := 'ó';
+      'Õ': to_char_lower := 'õ';
+      'Ò': to_char_lower := 'ò';
+      'Ü': to_char_lower := 'ü';
+      'Ú': to_char_lower := 'ú';
+      'Ç': to_char_lower := 'ç';
+      else to_char_lower := lowercase(ch[1])[1];
+    end;
+  end;
+begin
+  //result := LowerCase(value);
+  result := EmptyStr;
+  if(length(trim(value)) > 0) then begin
+    for i := 1 to Length(value) do begin
+       result := result + to_char_lower(value[i]);
+    end;
+  end;
+
+end;
+
+function Split(text: String; Delimiter: Char): vString;
+var
+  I: Integer;
+  index: integer;
+
+  procedure incrementaVetor();
+  begin
+      inc(index);
+      SetLength(result, index);
+  end;
+
+  procedure incrementaRegistro(value: String);
+  begin
+       result[index-1] := result[index-1] + value;
+  end;
+begin
+   if(text <> EmptyStr) then begin
+        if(length(trim(text)) > 0) then begin
+             if(Delimiter <> '') then begin
+                 index := 0;
+                 for I := 1 to Length(text) do begin
+                     if(I = 1) then begin
+                          incrementaVetor();
+                          if(text[I] <> Delimiter) then begin
+                              incrementaRegistro(text[I]);
+                          end;
+                     end else if(text[I] = Delimiter) then begin
+                         incrementaVetor();
+                     end else begin
+                         incrementaRegistro(text[I]);
+                     end;
+                 end;
+             end else begin
+                 SetLength(result, 1);
+                 result[0] := text;
+             end;
+        end;
+   end;
+end;
+
+function validaCPF(const value: String):boolean;
+begin
+  Result := Copy ( value, 10, 2 ) = DvCPF ( Copy ( value, 1, 9 ) );
+end;
+
+function validaCNPJ(const value: String):boolean;
+begin
+    Result := Copy ( value, 13, 2 ) = DvCNPJ ( Copy ( value, 1, 12 ) );
+end;
+
+function DvCPF ( str: String ): String;
+  var dv1: Char;
+  begin
+    dv1 := dvModulo11ParaCPF ( str );
+    Result := dv1 + dvModulo11ParaCPF ( str + dv1 );
+  end;
+
+function dvModulo11ParaCPF ( str: String ): Char;
+  var soma, fator, i: Integer;
+  begin
+    soma := 0;
+    fator := 2;
+    for i := Length ( str ) downto 1 do
+      begin
+        soma := soma + chInt ( str[i] ) * fator;
+        Inc ( fator );
+      end;
+    soma := 11 - ( soma mod 11 );
+    if soma >= 10 then
+        Result := '0'
+    else
+        Result := intCh ( soma );
+  end;
+
+function DvCNPJ ( str: String ): String;
+  var dv1: Char;
+begin
+    dv1 := DvModulo11 ( str );
+    Result := dv1 + DvModulo11 ( str + dv1 );
+end;
+
+function DvModulo11 ( str: String ): Char;
+  var soma, fator, i: Integer;
+  begin
+    soma := 0;
+    fator := 2;
+    for i := Length ( str ) downto 1 do
+      begin
+        soma := soma + chInt ( str[i] ) * fator;
+        Inc ( fator );
+        if fator = 10 then
+            fator := 2;
+      end;
+    soma := 11 - ( soma mod 11 );
+    if soma >= 10 then
+        Result := '0'
+    else
+        Result := intCh ( soma );
+  end;
+
+function chInt ( ch: Char ): ShortInt;
+  begin
+    Result := Ord ( ch ) - Ord ( '0' );
+  end;
+
+function intCh ( int: ShortInt ): Char;
+  begin
+    Result := Chr ( int + Ord ( '0' ) );
+  end;
+
+function validaEmail(const value: String):boolean;
+  function checkAllowed(const s: string): Boolean;
+  var
+     i: Integer;
+  begin
+  checkAllowed := False;
+  for I := 1 to Length(s) do
+    if not(s[i] in ['a' .. 'z','A' .. 'Z', '0' .. '9', '_', '-', '.']) then
+       Exit;
+    checkAllowed := True;
+end;
+var
+  i: Integer;
+  NamePart, ServerPart: string;
+begin
+   Result := False;
+   i := pos('@', value);
+   if i = 0  then
+      Exit;
+    NamePart := Copy(value, 1, i - 1);
+    ServerPart := Copy(value, i + 1, length(value));
+    if(Length(NamePart) = 0) or ((Length(ServerPart) <5)) then
+      Exit;
+    i := Pos('.', ServerPart);
+    if(i = 0) or (i > (Length(ServerPart) - 2)) then
+      Exit;
+    Result := checkAllowed(NamePart) and checkAllowed(ServerPart);
+end;
+
+function validaCEP(const value: String):boolean;
+begin
+  result := true;
+end;
+
+
+{ TAlertaThred }
+
+constructor TAlertaThred.Create(const CreateSuspended: boolean; const tempo: integer);
+begin
+  Self.FTempo   := tempo;
+  Self.FreeOnTerminate  := true;
+  inherited Create(CreateSuspended);
+end;
+
+procedure TAlertaThred.Execute;
+begin
+  inherited;
+  executaBeep();
+end;
+
+procedure TAlertaThred.executaBeep();
+var
+   index: integer;
+begin
+
+   index := 0;
+   while True do begin
+      Windows.Beep(3300, 1000);
+      Sleep(1);
+      inc(index);
+      if(index > 2) then begin
+           break;
+      end;
+   end;
+
+end;
+
+function TAlertaThred.getTempoToTime(): TTime;
+var
+   h, m, s : integer;
+   xh, xm, xs : integer;
+   str: String;
+begin
+
+     h := trunc(FTempo / 100 / 60 / 60);
+     xh := h * 60 * 60 * 1000;
+
+     m := trunc((FTempo - xh) / 1000 / 600);
+     xm := m * 60 * 1000;
+
+     s := trunc((FTempo - xh - xm) / 1000);
+
+     str := iif(h < 10 , '0', '')+ IntToStr(h) + ':';
+     str := str + iif(m < 10 , '0', '')+ IntToStr(m) + ':';
+     str := str + iif(s < 10 , '0', '')+ IntToStr(s) ;
+
+     result := StrToTime(str);
+
+end;
+
+function removeMascaraTelefone(const value: String):String;
+begin
+  result := StringReplace(value, '(','',[rfReplaceAll]);
+  result := StringReplace(result, ')','',[rfReplaceAll]);
+  result := StringReplace(result, '-','',[rfReplaceAll]);
+  result := StringReplace(result, '+','',[rfReplaceAll]);
+  result := StringReplace(result, ' ','',[rfReplaceAll]);
+end;
+
+function removeMascaraCPF(const value: string): string;
+begin
+  result := stringReplace( value, '.','',[rfReplaceAll]);
+  result := stringReplace( result, '.','',[rfReplaceAll]);
+  result := StringReplace(result, '-','',[rfReplaceAll]);
+end;
+
+function removeMascaraCEP(const value: string): string;
+begin
+  result := StringReplace(value, '-','',[rfReplaceAll]);
+  result := StringReplace(result, '.','',[rfReplaceAll]);
+  result := StringReplace(result, ' ','',[rfReplaceAll]);
+end;
+
+function emiteErro(const msg: String; var state : Integer): TColor;
+begin
+    state := state +1;
+    result := $006A61BE;
+    MessageDlg(msg, mtError, [mbOK],0);
+end;
+
+function testaCampoPorTamanho(const value: String; const minimo: Integer; const maximo : Integer; const msg: String; var state : Integer): TColor;
+var
+  size : integer;
+begin
+  size := length(value);
+  result := clWindow;
+  if((size < minimo) or  (size > maximo)) then begin
+    result := emiteErro(msg, state);
+  end;
+end;
+
+function testaCampoPorTamanhoSeInformado(const value: String; const minimo: Integer; const maximo : Integer; const msg: String; var state : Integer): TColor;
+var
+  size : integer;
+begin
+  size := length(value);
+  result := clWindow;
+  if(size > 0 ) then begin
+    result := testaCampoPorTamanho(value,minimo,maximo,msg, state);
+  end;
+end;
+
+function testaCampoPorDataMaior(const value: TDate; const maximo : TDate; const msg: String; var state : Integer): TColor;
+begin
+  result := clWindow;
+  if(value >= maximo) then begin
+    result := emiteErro( msg, state);
+  end;
+end;
+
+function testaCampoHoraPreenchido(const value: TTime; const msg: String; var state : Integer): TColor;
+begin
+  result := clWindow;
+  if(value <= 0) then begin
+    result := emiteErro( msg, state);
+  end;
+end;
+
+function testaCampoEmailSeInformado(const value: String; const msg: String; var state : Integer): TColor;
+var
+  size : integer;
+begin
+  size := length(value);
+  result := clWindow;
+  if(size > 0 ) then begin
+    result :=  testaCampoEmail(value, msg, state);
+  end;
+end;
+
+function testaCampoEmail(const value: String; const msg: String; var state : Integer): TColor;
+begin
+  result := clWindow;
+  if(not validaEmail(value)) then begin
+    result := emiteErro(msg, state);
+  end;
+end;
+
+function testaCampoCPF(const value: String; const msg: String; var state : Integer): TColor;
+begin
+  result := clWindow;
+  if(not validaCPF(value)) then begin
+    result := emiteErro(msg, state);
+  end;
+end;
+
+function testaCampoCNPJ(const value: String; const msg: String; var state : Integer): TColor;
+begin
+  result := clWindow;
+  if(not validaCNPJ(value)) then begin
+    result := emiteErro(msg, state);
+  end;
+end;
+
+function testaCampoCEP(const value: String; const msg: String; var state : Integer): TColor;
+begin
+  result := clWindow;
+  if(not validaCEP(value)) then begin
+    result := emiteErro(msg, state);
+  end;
+end;
+
+function comparaHora(const value1:TDateTime; const value2:TDateTime):SmallInt;
+  var h1, h2 : Real;
+begin
+  h1 := value1 - trunc(value1);
+  h2 := value2 - trunc(value2);
+
+  if(value1 > value2) then result := 1
+  else if(value1 < value2) then result := 2
+  else result := 0;
+end;
+
+function comparaDia(const value1:TDateTime; const value2:TDateTime):SmallInt;
+  var h1, h2 : Integer;
+begin
+  h1 := trunc(value1);
+  h2 := trunc(value2);
+
+  if(value1 > value2) then result := 1
+  else if(value1 < value2) then result := 2
+  else result := 0;
+end;
+
+function comparaDiaHora(const value1:TDateTime; const value2:TDateTime):SmallInt;
+  var h1, h2 : Real;
+begin
+  h1 := value1;
+  h2 := value2;
+
+  if(value1 > value2) then result := 1
+  else if(value1 < value2) then result := 2
+  else result := 0;
+end;
+
+procedure lerArquivo(var vtString:vString; arq : string; cript:Boolean = False);
+var
+  F: TextFile;
+  S: string;
+  A: UTF8String;
+  count : Integer;
+begin
+
+  try
+     vtString := nil;
+     if(FileExists(PChar(arq))) then begin
+       AssignFile(F, arq);
+       Reset(F);
+       count := 0;
+       while(not Eof(F)) do begin
+          Inc(count);
+          Readln(F, S);
+
+          A := S;
+
+          SetLength(vtString,count);
+          vtString[count -1] := Iif(cript, EnDEcriptar(A), A);
+       end;
+
+       CloseFile(F);
+     end;
+  except
+      raise Exception.Create('Não foi possível abrir o arquivo: '+arq);
+  end;
+end;
+
+procedure addLineInVString(var vtString: vString; const line: String);
+var
+  count : Integer;
+begin
+   try
+     if(Assigned(vtString)) then begin
+        count := Length(vtString);
+     end else begin
+        count := 0;
+     end;
+     SetLength(vtString,count + 1);
+     vtString[count] := line;
+  except
+      raise Exception.Create('Não foi possível adicionar a linha no vetor de string: '+line);
+  end;
+
+end;
+
+function addVectorString(var vt: vString; const value: string): Integer;
+var
+    index: integer;
+begin
+    if(Assigned(vt)) then begin
+        index := Length(vt);
+    end else begin
+        index := 0;
+    end;
+
+    SetLength(vt, index + 1);
+    vt[index] := value;
+    result := index + 1;
+end;
+
+function gravaArquivo(var vtString:vString; arq:string; cript:Boolean = False):Boolean;
+var
+  F: TextFile;
+  I: Integer;
+  finalArq : Integer;
+begin
+  Result := false;
+  try
+     if(Length(vtString) > 0) then begin
+       finalArq := High(vtString);
+       AssignFile(F, arq);
+       Rewrite(F);
+       for I := Low(vtString) to finalArq do begin
+          if(I = finalArq) then begin
+            Write(F, Iif(cript, EnDEcriptar(vtString[I]),vtString[I]));
+          end else begin
+            Writeln(F, Iif(cript, EnDEcriptar(vtString[I]),vtString[I]));
+          end;
+       end;
+       CloseFile(F);
+
+       Result := True;
+     end;
+  except
+      raise Exception.Create('Não foi possível abrir o arquivo: '+arq);
+  end;
+
+end;
+
+function ProcessArquivo(const Origem, Destino : string; Operacao:Integer = 1; Modo:Integer = 1) : Boolean;
+  Const
+      Aborted : Boolean = False;
+
+  var
+      shfo : TSHFileOpStruct;
+begin
+  FillChar(shfo,SizeOf(shfo),$0);
+  with shfo do begin
+      if Operacao > 2 then begin
+      operacao := 2;
+      end;
+
+      if Modo > 5 then begin
+          modo := 1;
+      end;
+
+      case operacao of
+          1: wFunc := FO_MOVE;
+          2: wFunc := FO_COPY;
+      end;
+
+      pFrom := Pchar(Origem);
+      pTo := Pchar(Destino);
+
+      case Modo of
+          1: fFlags := FOF_SILENT;
+          2: fFlags := FOF_ALLOWUNDO or FOF_FILESONLY;
+          3: fFlags := FOF_RENAMEONCOLLISION;
+          4: fFlags := FOF_NOCONFIRMATION;
+          5: fFlags := FOF_SIMPLEPROGRESS;
+      end;
+  end;
+  Result := (SHFileOperation(shfo)= 0) and (not Aborted);
+end;
+
+function EnDecriptar(Texto : String) : String;
+var
+  I      : Integer;
+  xTexto,
+  xchave : string;
+
+
+begin
+   xchave := montachave(Texto);
+   xTexto := '';
+   For I:=1 To Length(Texto) Do Begin
+     xTexto := xTexto + char(Byte(Texto[I]) xor Byte(xchave[I]));
+   End;
+   Result := xTexto;
+end;
+
+function MontaChave(Texto : String) : String;
+var
+  I, xPos : integer;
+  xchave : string;
+begin
+   If Length(Texto) > Length(chave) Then Begin
+      xchave := chave;
+      for I := (Length(chave)+ 1) To Length(Texto) Do Begin
+         xPos := I mod (Length(chave));
+         If xPos = 0 then xPos := Length(chave);
+         xchave := xchave + chave[xPos];
+      End;
+   End Else If Length(Texto) < Length(chave) Then Begin
+      xchave := '';
+      for I := 1 To Length(Texto) Do Begin
+         xchave := xchave + chave[I];
+      End;
+   End Else Begin
+      xchave := chave;
+   End;
+   Result := xchave;
+end;
+
+end.

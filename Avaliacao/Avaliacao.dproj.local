@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2023/06/14 16:57:55.093.pas,C:\Users\Clayton\Documents\RAD Studio\Projects\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Splash.pas</Transaction>
+    <Transaction>2023/06/14 16:57:55.093.dfm,C:\Users\Clayton\Documents\RAD Studio\Projects\Unit1.dfm=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Splash.dfm</Transaction>
+    <Transaction>2023/06/14 16:58:05.386.dproj,C:\Users\Clayton\Documents\RAD Studio\Projects\Project2.dproj=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Avaliacao.dproj</Transaction>
+    <Transaction>2023/06/15 07:45:35.853.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\core\pages\generic\UFormCrud.pas=</Transaction>
+    <Transaction>2023/06/15 07:45:35.853.dfm,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\core\pages\generic\UFormCrud.dfm=</Transaction>
+    <Transaction>2023/06/15 09:49:48.752.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\pages\client\UFrmClient.pas</Transaction>
+    <Transaction>2023/06/15 09:49:48.752.dfm,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.dfm=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\pages\client\UFrmClient.dfm</Transaction>
+    <Transaction>2023/06/15 10:22:39.015.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\UClientModel.pas</Transaction>
+    <Transaction>2023/06/15 10:27:15.181.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\domain\UAddressModel.pas</Transaction>
+    <Transaction>2023/06/15 17:29:02.838.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\data_modules\UDMCrud.pas</Transaction>
+    <Transaction>2023/06/15 17:29:02.838.dfm,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.dfm=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\data_modules\UDMCrud.dfm</Transaction>
+    <Transaction>2023/06/15 20:48:42.927.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\pages\client\UCrudClientModal.pas</Transaction>
+    <Transaction>2023/06/15 20:48:42.927.dfm,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.dfm=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\pages\client\UCrudClientModal.dfm</Transaction>
+    <Transaction>2023/06/16 17:17:16.986.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\domain\UAddresSearchCep.pas</Transaction>
+    <Transaction>2023/06/16 21:18:52.971.pas,D:\work\Porjects\clayton\Info Sistemas\Avaliacao\Unit1.pas=D:\work\Porjects\clayton\Info Sistemas\Avaliacao\core\services\UConnectionSmtpClient.pas</Transaction>
+  </Transactions>
+</BorlandProject>

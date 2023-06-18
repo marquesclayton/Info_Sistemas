@@ -1,0 +1,437 @@
+unit UBaseModelJson;
+
+interface
+
+  uses DBXJSON, UDateUtil, UUtilString;
+
+  type
+
+    TSetFieldJson = procedure(const value:TJSONValue) of Object;
+    TGetFieldJson = function(): TJSONPair of Object;
+    TTypeField = (tfString, tfBoolean, tfInt64, tfInt, tfDouble, tfDate, tfDateTime);
+
+    TBaseJson = record
+      fieldName: String;
+      field: Pointer;
+      typeField: TTypeField;
+    end;
+
+    vtBaseJson = array of TBaseJson;
+
+    TCustomBaseModelJson = class
+      private
+        fieldsFromJson: vtBaseJson;
+        function charge(const fieldName: String; field: Pointer; const typeField: TTypeField) : TBaseJson;
+        function getInt64(const value:TJSONValue; const jsonFieldName: String): Int64;
+        function getInt(const value:TJSONValue; const jsonFieldName: String): Integer;
+        function getDouble(const value:TJSONValue; const jsonFieldName: String): Double;
+        function getDate(const value:TJSONValue; const jsonFieldName: String): Double;
+        function getString(const value:TJSONValue; const jsonFieldName: String): String;
+        function getBoolean(const value:TJSONValue; const jsonFieldName: String): Boolean;
+
+        function toJsonInt64(const value: int64; const jsonFieldName: String): TJSONPair;
+        function toJsonDate(const value: TDate; const jsonFieldName: String): TJSONPair;
+        function toJsonDateTime(const value: TDateTime; const jsonFieldName: String): TJSONPair;
+        function toJsonString(const value: String; const jsonFieldName: String): TJSONPair;
+        function toJsonBoolean(const value: Boolean; const jsonFieldName: String): TJSONPair;
+        function toJsonDouble(const value: Double; const jsonFieldName: String): TJSONPair;
+      protected
+        dateUtil: TDateUtil;
+        stringUtil: TUtilString;
+        procedure addField(const fieldName: String; field: Pointer; const typeField: TTypeField);
+
+        function convertToInt64(const value: String): Int64;
+
+        procedure fromJsonStringCustom(const jValue: String);
+        procedure fromJsonObjectCustom(const jo: TJSONObject);
+        function toJsonCustom(): TJSONObject;
+        function getFieldJsonCustom(const fieldName: string; const jObject: TJSONObject): TJSONPair;overload;
+        function getStringJsonCustom(): String;
+      public
+        constructor Create;
+
+    end;
+
+    TBaseModelJson = class(TCustomBaseModelJson)
+      public
+        procedure fromJsonString(const jValue: String);
+        procedure fromJsonObject(const jo: TJSONObject);
+        function toJson(): TJSONObject;
+        function getStringJson(): String;
+
+
+    end;
+
+implementation
+
+uses SysUtils;
+
+{ TCustomBaseModelJson }
+
+procedure TCustomBaseModelJson.addField(const fieldName: String; field: Pointer; const typeField: TTypeField);
+var index: Integer;
+begin
+  index := 0;
+  if(Assigned(fieldsFromJson)) then begin
+     if( Length(fieldsFromJson) > 0) then begin
+       index := Length(fieldsFromJson);
+     end;
+  end;
+  SetLength(fieldsFromJson, index + 1);
+  fieldsFromJson[index] := charge(fieldName, field, typeField);
+end;
+
+function TCustomBaseModelJson.charge(const fieldName: String; field: Pointer; const typeField: TTypeField): TBaseJson;
+begin
+    result.fieldName := fieldName;
+    result.field := field;
+    result.typeField := typeField;
+end;
+
+constructor TCustomBaseModelJson.Create;
+begin
+  dateUtil := TDateUtil.create;
+  stringUtil := TUtilString.create;
+end;
+
+procedure TCustomBaseModelJson.fromJsonObjectCustom(const jo: TJSONObject);
+var
+  st: ^String;
+  itL: ^int64;
+  it: ^Integer;
+  db: ^double;
+  dt: ^TDate;
+  dtt: ^TDateTime;
+  bl: ^Boolean;
+
+  i, x: Integer;
+  baseJson: TBaseJson;
+  jp : TJSONPair;
+begin
+    for i := Low(fieldsFromJson) to High(fieldsFromJson) do begin
+      baseJson := fieldsFromJson[i];
+      for x := 0 to jo.Size - 1 do begin
+        jp := jo.Get(x);
+        if(LowerCase(jp.JsonString.Value) = LowerCase(baseJson.fieldName)) then begin
+          case (baseJson.typeField) of
+            tfString:
+              begin
+                st := baseJson.field;
+                st^ := getString(jp.JsonValue, baseJson.fieldName);
+              end;
+            tfInt64:
+              begin
+                itL := baseJson.field;
+                itL^ := getInt64(jp.JsonValue, baseJson.fieldName);
+              end;
+            tfInt:
+              begin
+                it := baseJson.field;
+                it^ := getInt(jp.JsonValue, baseJson.fieldName);
+              end;
+            tfDouble:
+              begin
+                db := baseJson.field;
+                db^ := getDouble(jp.JsonValue, baseJson.fieldName);
+              end;
+            tfDate:
+              begin
+                dt := baseJson.field;
+                dt^  := getDate(jp.JsonValue, baseJson.fieldName);
+              end;
+            tfDateTime:
+              begin
+                dtt := baseJson.field;
+                dtt^ := getDate(jp.JsonValue, baseJson.fieldName);
+              end;
+            tfBoolean:
+              begin
+                bl := baseJson.field;
+                bl^ := getBoolean(jp.JsonValue, baseJson.fieldName);
+              end;
+          end;
+          break;
+        end;
+      end;
+    end;
+
+end;
+
+procedure TCustomBaseModelJson.fromJsonStringCustom(const jValue: String);
+var
+  jObj : TJSONObject;
+begin
+  try
+    jObj := TJsonObject(TJSONObject.ParseJSONValue(TEncoding.Default.GetBytes(Self.stringUtil.StripNonJson(jValue)),0));
+    fromJsonObjectCustom(jObj);
+  finally
+    FreeAndNil(jObj);
+  end;
+end;
+
+function TCustomBaseModelJson.getBoolean(const value: TJSONValue;
+  const jsonFieldName: String): Boolean;
+begin
+   result := LowerCase(value.Value) = 'true';
+
+end;
+
+function TCustomBaseModelJson.getDate(const value: TJSONValue;
+  const jsonFieldName: String): Double;
+var
+  i: Integer;
+begin
+  result := dateUtil.convertDateJSToDelphi(convertToInt64((value as TJSONNumber).Value));
+
+end;
+
+function TCustomBaseModelJson.getDouble(const value: TJSONValue;
+  const jsonFieldName: String): Double;
+begin
+  result := (value as TJSONNumber).AsDouble;
+end;
+
+function TCustomBaseModelJson.getFieldJsonCustom(const fieldName: string;
+  const jObject: TJSONObject): TJSONPair;
+var
+  i: Integer;
+  jp: TJSONPair;
+  found: Boolean;
+begin
+  try
+    found := false;
+    for i := 0 to jObject.Size - 1 do begin
+      jp := jObject.Get(i);
+      if(LowerCase(jp.JsonString.Value) = LowerCase(fieldName)) then begin
+        result := jp;
+        found := true;
+        break;
+      end;
+    end;
+  finally
+    if(not found) then begin
+      if(Assigned(jp)) then begin
+        FreeAndNil(jp);
+      end;
+    end;
+  end;
+
+end;
+
+function TCustomBaseModelJson.getInt(const value: TJSONValue;
+  const jsonFieldName: String): Integer;
+begin
+  result := (value as TJSONNumber).AsInt;
+end;
+
+function TCustomBaseModelJson.getInt64(const value: TJSONValue;
+  const jsonFieldName: String): Int64;
+begin
+  result := convertToInt64((value as TJSONNumber).Value);
+end;
+
+function TCustomBaseModelJson.getString(const value: TJSONValue;
+  const jsonFieldName: String): String;
+begin
+  result := (value as TJSONString).Value;
+end;
+
+function TCustomBaseModelJson.getStringJsonCustom: String;
+var
+  i: Integer;
+  bj: TBaseJson;
+  vS: String;
+  vI6: int64;
+  vI: Integer;
+  vD: Double;
+  vdT: TDate;
+  vDtt: TdateTime;
+  vB: Boolean;
+  jo: TJSONObject;
+begin
+  jo := TJSONObject.Create;
+  try
+      for i := Low(fieldsFromJson) to High(fieldsFromJson) do begin
+        if(bj.field <> nil) then begin
+            bj := fieldsFromJson[i];
+            case bj.typeField of
+              tfString:
+                  begin
+                    vS := String(bj.field^);
+                    jo.AddPair(TJSONPair.Create(bj.fieldName, vS));
+                  end;
+              tfInt64:
+                  begin
+                    vI6 := Int64(bj.field^);
+                    jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(vI6)));
+                  end;
+              tfInt:
+                  begin
+                    vI := Integer(bj.field^);
+                    jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(vI)));
+                  end;
+
+              tfDouble:
+                  begin
+                    vD := Double(bj.field^);
+                    jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(vD)));
+                  end;
+              tfDate:
+                begin
+                    vdT := TDate(bj.field^);
+                    jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(dateUtil.convertDateDelphiToJS(vdT))));
+                end;
+              tfDateTime:
+                begin
+                    vDtt := TDateTime(bj.field^);
+                    jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(dateUtil.convertDateDelphiToJS(vDtt))));
+                end;
+              tfBoolean:
+                begin
+                    vB := Boolean(bj.field^);
+                    if(vB) then begin
+                      jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONTrue.Create()));
+                    end else begin
+                      jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONFalse.Create()));
+                    end;
+                end;
+            end;
+        end;
+      end;
+
+      result := jo.ToString;
+  finally
+      jo.Free;
+  end;
+end;
+
+function TCustomBaseModelJson.convertToInt64(const value: String): Int64;
+begin
+  result := StrToInt64(value);
+end;
+
+function TCustomBaseModelJson.toJsonCustom: TJSONObject;
+var
+  i: Integer;
+  bj: TBaseJson;
+  vS: String;
+  vI6: int64;
+  vI: Integer;
+  vD: Double;
+  vdT: TDate;
+  vDtt: TdateTime;
+  vB: Boolean;
+  jo: TJSONObject;
+begin
+  jo := TJSONObject.Create;
+  for i := Low(fieldsFromJson) to High(fieldsFromJson) do begin
+    if(bj.field <> nil) then begin
+        bj := fieldsFromJson[i];
+        case bj.typeField of
+          tfString:
+              begin
+                vS := String(bj.field^);
+                jo.AddPair(TJSONPair.Create(bj.fieldName, vS));
+              end;
+          tfInt64:
+              begin
+                vI6 := Int64(bj.field^);
+                jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(vI6)));
+              end;
+          tfInt:
+              begin
+                vI := Integer(bj.field^);
+                jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(vI)));
+              end;
+
+          tfDouble:
+              begin
+                vD := Double(bj.field^);
+                jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(vD)));
+              end;
+          tfDate:
+            begin
+                vdT := TDate(bj.field^);
+                jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(dateUtil.convertDateDelphiToJS(vdT))));
+            end;
+          tfDateTime:
+            begin
+                vDtt := TDateTime(bj.field^);
+                jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONNumber.Create(dateUtil.convertDateDelphiToJS(vDtt))));
+            end;
+          tfBoolean:
+            begin
+                vB := Boolean(bj.field^);
+                if(vB) then begin
+                  jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONTrue.Create()));
+                end else begin
+                  jo.AddPair(TJSONPair.Create(bj.fieldName, TJSONFalse.Create()));
+                end;
+            end;
+        end;
+    end;
+  end;
+
+  result := jo;
+end;
+
+function TCustomBaseModelJson.toJsonBoolean(const value: Boolean;
+  const jsonFieldName: String): TJSONPair;
+begin
+
+end;
+
+function TCustomBaseModelJson.toJsonDate(const value: TDate;
+  const jsonFieldName: String): TJSONPair;
+begin
+
+end;
+
+function TCustomBaseModelJson.toJsonDateTime(const value: TDateTime;
+  const jsonFieldName: String): TJSONPair;
+begin
+
+end;
+
+function TCustomBaseModelJson.toJsonDouble(const value: Double;
+  const jsonFieldName: String): TJSONPair;
+begin
+
+end;
+
+function TCustomBaseModelJson.toJsonInt64(const value: int64;
+  const jsonFieldName: String): TJSONPair;
+begin
+
+end;
+
+function TCustomBaseModelJson.toJsonString(const value,
+  jsonFieldName: String): TJSONPair;
+begin
+
+end;
+
+{ TBaseModelJson }
+
+procedure TBaseModelJson.fromJsonString(const jValue: String);
+begin
+  Self.fromJsonStringCustom(jValue);
+end;
+
+function TBaseModelJson.getStringJson: String;
+begin
+    result := Self.getStringJsonCustom();
+end;
+
+procedure TBaseModelJson.fromJsonObject(const jo: TJSONObject);
+begin
+  Self.fromJsonObjectCustom(jo);
+
+end;
+
+function TBaseModelJson.toJson: TJSONObject;
+begin
+  result := toJsonCustom();
+end;
+
+end.

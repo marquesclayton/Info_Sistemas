@@ -1,0 +1,29 @@
+unit UClientModel;
+
+interface
+
+    uses UBaseModelName;
+
+type
+    TClientModel = class(TBaseModelName)
+
+        private
+          FNome: String;
+          FIdentidade: String;
+          FCPF: String;
+          FTelefone: String;
+          FEmail: String;
+          FEndereço
+          FCep
+          FLogradouro
+          FNumero
+          FComplemento
+          FBairro
+          FCidade
+          FEstado
+          FPais
+    end;
+
+implementation
+
+end.

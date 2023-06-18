@@ -1,0 +1,85 @@
+unit USplash;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, pngimage, ExtCtrls, UTheme;
+
+type
+  TFrmSplash = class(TForm)
+    pnSplashHeader: TPanel;
+    imgSplashLogo: TImage;
+    lblSplashTitle1: TLabel;
+    pnSplashInformation: TPanel;
+    lblSplashTitle2: TLabel;
+    lblSplashApplicant: TLabel;
+    timerSplash: TTimer;
+    lblTextTimer: TLabel;
+    procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure timerSplashTimer(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    theme: TThemeData;
+    init: TDateTime;
+  public
+    { Public declarations }
+  end;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmSplash.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    Action := caFree;
+end;
+
+procedure TFrmSplash.FormCreate(Sender: TObject);
+begin
+    theme := TThemeData.Create;
+end;
+
+procedure TFrmSplash.FormDestroy(Sender: TObject);
+begin
+    theme.Destroy;
+end;
+
+procedure TFrmSplash.FormShow(Sender: TObject);
+begin
+   theme.makeRounded(Self);
+   theme.makeRounded(Self.pnSplashHeader);
+   init := Now();
+   timerSplash.Enabled := true;
+end;
+
+procedure TFrmSplash.timerSplashTimer(Sender: TObject);
+var
+    interval: double;
+    timeLeft: integer;
+    information: String;
+begin
+    interval := 15 / 24 / 60 / 60;
+    timeLeft := Trunc( ((init + interval) - now) * 24 * 60 *60);
+    information := 'Splash fecha em:  ' ;
+    if(timeLeft < 10) then begin
+        information := information + '0';
+    end;
+
+    information := information + IntToStr(timeLeft + 1) + ' segundos.';
+
+    lblTextTimer.Caption := information;
+    if((init + interval) < now) then begin
+        timerSplash.Enabled := false;
+        close;
+    end;
+end;
+
+initialization
+    RegisterClass(TFrmSplash)
+finalization
+    UnRegisterClass(TFrmSplash);
+
+end.

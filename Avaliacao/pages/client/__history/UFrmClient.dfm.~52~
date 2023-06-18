@@ -1,0 +1,191 @@
+object FrmClient: TFrmClient
+  AlignWithMargins = True
+  Left = 69
+  Top = 0
+  Margins.Left = 0
+  Margins.Top = 0
+  Margins.Right = 0
+  Margins.Bottom = 0
+  Align = alClient
+  Anchors = []
+  BorderIcons = []
+  BorderStyle = bsNone
+  Caption = 'Cadastros de clientes'
+  ClientHeight = 648
+  ClientWidth = 855
+  Color = clBtnFace
+  DoubleBuffered = True
+  ParentFont = True
+  Padding.Left = 10
+  Padding.Top = 10
+  Padding.Right = 10
+  Padding.Bottom = 10
+  OldCreateOrder = False
+  Position = poDesigned
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnChild: TPanel
+    AlignWithMargins = True
+    Left = 10
+    Top = 10
+    Width = 835
+    Height = 628
+    Margins.Left = 0
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Align = alClient
+    Anchors = []
+    BevelEdges = []
+    BevelOuter = bvNone
+    Caption = 'pnChild'
+    ParentColor = True
+    ShowCaption = False
+    TabOrder = 0
+    object pnGridList: TPanel
+      AlignWithMargins = True
+      Left = 70
+      Top = 0
+      Width = 765
+      Height = 628
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alClient
+      BevelOuter = bvNone
+      Caption = 'pnGridList'
+      ShowCaption = False
+      TabOrder = 0
+      object gridClient: TDBGrid
+        AlignWithMargins = True
+        Left = 0
+        Top = 0
+        Width = 765
+        Height = 628
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Align = alClient
+        Anchors = []
+        Color = 16513260
+        DataSource = dsClient
+        DrawingStyle = gdsGradient
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Calibri'
+        Font.Style = []
+        Options = [dgTitles, dgIndicator, dgColLines, dgRowLines, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick]
+        ParentFont = False
+        PopupMenu = ppActionsGrid
+        TabOrder = 0
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -15
+        TitleFont.Name = 'Calibri'
+        TitleFont.Style = []
+        OnDblClick = gridClientDblClick
+        Columns = <
+          item
+            Expanded = False
+            FieldName = 'Name'
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Nome do cliente'
+            Width = 250
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'email'
+            Title.Alignment = taCenter
+            Title.Caption = 'E-mail'
+            Width = 250
+            Visible = True
+          end
+          item
+            Alignment = taCenter
+            Expanded = False
+            FieldName = 'telephone'
+            Title.Alignment = taCenter
+            Title.Caption = 'Telefone'
+            Width = 150
+            Visible = True
+          end>
+      end
+    end
+    object pnBtnNew: TPanel
+      AlignWithMargins = True
+      Left = 10
+      Top = 0
+      Width = 50
+      Height = 628
+      Margins.Left = 10
+      Margins.Top = 0
+      Margins.Right = 10
+      Margins.Bottom = 0
+      Align = alLeft
+      BevelEdges = []
+      BevelOuter = bvNone
+      Caption = 'pnBtnNew'
+      Color = 14592154
+      ParentBackground = False
+      ShowCaption = False
+      TabOrder = 1
+      object btnNewClient: TSpeedButton
+        AlignWithMargins = True
+        Left = 0
+        Top = 0
+        Width = 50
+        Height = 628
+        Hint = 'Novo registro'
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Align = alClient
+        Anchors = []
+        Caption = '+'
+        Flat = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -23
+        Font.Name = 'Font Awesome 6 Free Solid'
+        Font.Style = []
+        ParentFont = False
+        OnClick = btnNewClientClick
+        ExplicitLeft = 112
+        ExplicitTop = 24
+        ExplicitWidth = 23
+        ExplicitHeight = 22
+      end
+    end
+  end
+  object dsClient: TDataSource
+    DataSet = dmCrud.cdClient
+    Left = 544
+    Top = 96
+  end
+  object ppActionsGrid: TPopupMenu
+    Left = 640
+    Top = 376
+    object ppItemView: TMenuItem
+      Caption = 'Visualizar registro'
+      Default = True
+      ShortCut = 16471
+      OnClick = ppItemViewClick
+    end
+    object ppItemEdit: TMenuItem
+      Caption = 'Editar registro'
+      ShortCut = 16453
+      OnClick = ppItemEditClick
+    end
+    object ppItemDelete: TMenuItem
+      Caption = 'Excluir registro'
+      ShortCut = 16452
+    end
+  end
+end

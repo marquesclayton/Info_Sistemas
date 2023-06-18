@@ -1,0 +1,105 @@
+unit UFormOfBody;
+
+interface
+
+uses
+    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+    Dialogs, UFormGeneric, StdCtrls, ExtCtrls, Buttons;
+
+type
+
+    TCallBackCloseForm = procedure(form: TForm) of Object;
+
+    TformOfBody = class(TformGeneric)
+        pnFull: TPanel;
+        pnActions: TPanel;
+        pnTitle: TPanel;
+        bvPnActions: TBevel;
+        pnBtnReturn: TPanel;
+        btnReturn: TSpeedButton;
+
+        procedure btnFormReturnClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    private
+        _title: String;
+        _finished: Boolean;
+        _closeForm: TCallBackCloseForm;
+
+    protected
+
+        procedure chargeComponentes(childPanel: TPanel);
+        procedure closeActions; virtual;
+        procedure openActions; virtual;
+
+        procedure setTitle(const title: String);
+        function getTitle():String;
+    public
+        showMessageError: TCallBackShowMessage;
+        showMessageInfo: TCallBackShowMessage;
+        showMessageWarning: TCallBackShowMessage;
+        showMessageOk: TCallBackShowMessage;
+
+
+        function isFinished(): Boolean;
+
+        procedure setCallBackCloseForm(proc: TCallBackCloseForm);
+
+    end;
+
+implementation
+
+{$R *.dfm}
+{ TformOfBody }
+
+procedure TformOfBody.btnFormReturnClick(Sender: TObject);
+begin
+    Self.Close;
+    _finished := true;
+    _closeForm(Self);
+end;
+
+procedure TformOfBody.chargeComponentes(childPanel: TPanel);
+begin
+    theme.makeRounded(childPanel, 10);
+    childPanel.Parent := pnFull;
+    theme.makeRounded(pnFull);
+end;
+
+procedure TformOfBody.closeActions;
+begin
+    btnReturn.Enabled := false;
+end;
+
+procedure TformOfBody.FormCreate(Sender: TObject);
+begin
+  inherited;
+  pnTitle.Caption := Self._title;
+  btnReturn.Hint := 'Fechar o formulário: ' + Self._title;
+end;
+
+function TformOfBody.getTitle: String;
+begin
+    result := Self._title;
+end;
+
+function TformOfBody.isFinished: Boolean;
+begin
+    result := Self._finished;
+end;
+
+procedure TformOfBody.openActions;
+begin
+    btnReturn.Enabled := true;
+end;
+
+procedure TformOfBody.setCallBackCloseForm(proc: TCallBackCloseForm);
+begin
+    Self._closeForm := proc;
+end;
+
+procedure TformOfBody.setTitle(const title: String);
+begin
+  Self._title := title;
+end;
+
+end.

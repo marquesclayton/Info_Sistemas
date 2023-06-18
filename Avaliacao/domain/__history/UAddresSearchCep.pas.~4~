@@ -1,0 +1,88 @@
+unit UAddresSearchCep;
+
+interface
+
+uses UBaseModelJson;
+
+type
+    TAddressCEP = class(TBaseModelJson)
+        private
+            FLogradouro: String;
+            FIbge: String;
+            FBairro: String;
+            FDdd: String;
+            FUf: String;
+            FCep: String;
+            FSiafi: String;
+            FLocalidade: String;
+            FComplemento: String;
+            FGia: String;
+    function getUf: String;
+        public
+            constructor Create;
+
+            property cep: String read FCep write FCep;
+            property logradouro: String read FLogradouro write FLogradouro;
+            property complemento: String read FComplemento write FComplemento;
+            property bairro: String read FBairro write FBairro;
+            property localidade: String read FLocalidade write FLocalidade;
+            property uf: String read getUf write FUf;
+            property ibge: String read FIbge write FIbge;
+            property gia: String read FGia write FGia;
+            property ddd: String read FDdd write FDdd;
+            property siafi: String read FSiafi write FSiafi;
+
+    end;
+
+implementation
+
+constructor TAddressCEP.Create;
+begin
+    inherited;
+    addField('cep', @FCep, tfString);
+    addField('ibge', @FIbge, tfString);
+    addField('bairro', @FBairro, tfString);
+    addField('localidade', @FLocalidade, tfString);
+    addField('logradouro', @FLogradouro, tfString);
+    addField('complemento', @FComplemento, tfString);
+    addField('uf', @FUf, tfString);
+    addField('gia', @FGia, tfString);
+    addField('ddd', @FDdd, tfString);
+    addField('siafi', @FSiafi, tfString);
+end;
+
+function TAddressCEP.getUf: String;
+begin
+    Result := Self.FUf;
+    case Self.FUf of
+        'AC': result := 'Acre';
+        'AL': result := 'Alagoas';
+        'AP': result := 'Amapá';
+        'AM': result := 'Amazonas';
+        'BA': result := 'Bahia';
+        'CE': result := 'Ceará';
+        'DF': result := 'Distrito Federal';
+        'ES': result := 'Espírito Santo';
+        'GO': result := 'Goiás';
+        'MA': result := 'Maranhão';
+        'MT': result := 'Mato Grosso';
+        'MS': result := 'Mato Grosso do Sul';
+        'MG': result := 'Minas Gerais';
+        'PA': result := 'Pará';
+        'PB': result := 'Paraíba';
+        'PR': result := 'Paraná';
+        'PE': result := 'Pernambuco';
+        'PI': result := 'Piauí';
+        'RJ': result := 'Rio de Janeiro';
+        'RN': result := 'Rio Grande do Norte';
+        'RS': result := 'Rio Grande do Sul';
+        'RO': result := 'Rondônia';
+        'RR': result := 'Roraima';
+        'SC': result := 'Santa Catarina';
+        'SP': result := 'São Paulo';
+        'SE': result := 'Sergipe';
+        'TO': result := 'Tocantins';
+    end;
+end;
+
+end.

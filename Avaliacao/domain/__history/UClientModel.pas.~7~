@@ -1,0 +1,98 @@
+unit UClientModel;
+
+interface
+
+    uses UBaseModelName, UBaseModelJson, XMLDoc, XMLIntf;
+
+type
+    TClientModel = class(TBaseModelName)
+
+        private
+            FIdCard: String;
+            FSocialSecurity: String;
+            FTelephone: String;
+            FEmail: String;
+            FPostalCode: String;
+            FStreet: String;
+            FNumber: STring;
+            FComplement: String;
+            FDistrict: String;
+            FState: String;
+            FCity: String;
+            FCountry: String;
+
+        public
+            constructor Create;
+            property idCard: String read FIdCard write FIdCard;
+            property socialSecurity: String read FSocialSecurity write FSocialSecurity;
+            property telephone: String read FTelephone write FTelephone;
+            property email: String read FEmail write FEmail;
+            property postalCode: String read FPostalCode write FPostalCode;
+            property street: String read FStreet write FStreet;
+            property number: String read FNumber write FNumber;
+            property complement: String read FComplement write FComplement;
+            property district: String read FDistrict write FDistrict;
+            property state: String read FState write FState;
+            property city: String read FCity write FCity;
+            property country: String read FCountry write FCountry;
+
+            function getXML(): TXMLDocument; override;
+
+    end;
+
+    TListClient = array of TClientModel;
+
+implementation
+
+uses SysUtils;
+
+{ TClientModel }
+
+constructor TClientModel.Create;
+begin
+  inherited Create;
+  addField('idCard', @FIdCard, tfString);
+  addField('socialSecurity', @FSocialSecurity, tfString);
+  addField('telephone', @FTelephone, tfString);
+  addField('email', @FEmail, tfString);
+  addField('postalCode', @FPostalCode, tfString);
+  addField('street', @FStreet, tfString);
+  addField('number', @FNumber, tfString);
+  addField('complement', @FComplement, tfString);
+  addField('district', @FDistrict, tfString);
+  addField('state', @FState, tfString);
+  addField('city', @FCity, tfString);
+  addField('country', @FCountry, tfString);
+end;
+
+function TClientModel.getXML: TXMLDocument;
+var
+  XMLDocument: TXMLDocument;
+  mainNode, detailNode, addressNode: IXMLNode;
+  I: Integer;
+begin
+    XMLDocument := TXMLDocument.Create(nil);
+    XMLDocument.Active := True;
+
+    mainNode := XMLDocument.AddChild('Cliente');
+
+    detailNode := mainNode.AddChild('Dados');
+    detailNode.ChildValues['Nome'] := name;
+    detailNode.ChildValues['Identidade'] := IdCard;
+    detailNode.ChildValues['CPF'] := socialSecurity;
+    detailNode.ChildValues['Telefone'] := telephone;
+    detailNode.ChildValues['Email'] := email;
+    addressNode := detailNode.AddChild('Endereco');
+    addressNode.ChildValues['CEP'] := postalCode;
+    addressNode.ChildValues['Logradouro'] := street;
+    addressNode.ChildValues['Numero'] := number;
+    addressNode.ChildValues['Complemento'] := complement;
+    addressNode.ChildValues['Bairro'] := district;
+    addressNode.ChildValues['Cidade'] := city;
+    addressNode.ChildValues['Estado'] := state;
+    addressNode.ChildValues['Pais'] := country;
+
+    result := XMLDocument;
+end;
+
+end.
